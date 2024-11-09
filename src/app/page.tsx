@@ -176,8 +176,7 @@ export default function Home() {
                 src=""
                 fallback={message.role == "user" ? "👨🏽" : "🤖"}
               />
-              <ChatBubbleMessage
-              >
+              <ChatBubbleMessage>
                 {message.content
                   .split("```")
                   .map((part: string, index: number) => {
@@ -271,10 +270,10 @@ export default function Home() {
         <GitHubLogoIcon className="size-4" />
         <p className="text-xs">
           <a
-            href="https://github.com/jakobhoeg/shadcn-chat"
+            href="https://github.com/ZubairImtiaz3"
             className="font-bold inline-flex flex-1 justify-center gap-1 leading-4 hover:underline"
           >
-            shadcn-chat
+            zubairimtiaz3
             <svg
               aria-hidden="true"
               height="7"
