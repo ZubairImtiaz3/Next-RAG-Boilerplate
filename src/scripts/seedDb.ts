@@ -33,6 +33,12 @@ const splitter = new RecursiveCharacterTextSplitter({
 // List of URLs to scrape
 const urls = [
     "https://zubair-imtiaz.vercel.app/",
+    "https://zubair-imtiaz.vercel.app/projects/01-gitissuefy/",
+    "https://zubair-imtiaz.vercel.app/projects/gitissuefy/",
+    "https://zubair-imtiaz.vercel.app/projects/mattemost/",
+    "https://zubair-imtiaz.vercel.app/projects/stripe-flutterflow-pricing/",
+    "https://zubair-imtiaz.vercel.app/projects/contentify/",
+    "https://zubair-imtiaz.vercel.app/projects/trade-ease/"
 ];
 
 // Progress Tracker File Path
@@ -63,7 +69,12 @@ const scrapePage = async (url: string) => {
             return '';
         }
 
-        return pageContent.replace(/<[^>]*>?/gm, "");
+        // Filter Content
+        let textContent = pageContent.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
+        textContent = textContent.replace(/<[^>]*>?/gm, "");
+        textContent = textContent.replace(/&quot;|&lt;|&gt;|&amp;/g, "");
+
+        return textContent.trim();
     } catch (error) {
         console.error(`Error scraping page ${url}:`, error);
         return '';
