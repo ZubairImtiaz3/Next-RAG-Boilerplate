@@ -1,7 +1,7 @@
 import fs from 'fs';
 import dotenv from 'dotenv';
+import fetch from 'node-fetch';
 import { DataAPIClient } from "@datastax/astra-db-ts";
-import { PuppeteerWebBaseLoader } from "@langchain/community/document_loaders/web/puppeteer";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { JinaEmbeddings } from "@langchain/community/embeddings/jina";
 
@@ -12,7 +12,8 @@ const {
     ASTRA_DB_ENDPOINT,
     ASTRA_DB_NAMESPACE,
     ASTRA_DB_COLLECTION,
-    JINA_API_KEY
+    JINA_API_KEY,
+    MARKDOWNER_API_KEY
 } = process.env;
 
 const client = new DataAPIClient(ASTRA_DB_TOKEN);
@@ -25,9 +26,9 @@ const embeddings = new JinaEmbeddings({
     apiKey: JINA_API_KEY
 });
 
-const splitter = new RecursiveCharacterTextSplitter({
+const splitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
     chunkSize: 512,
-    chunkOverlap: 100,
+    chunkOverlap: 50,
 });
 
 // List of URLs to scrape
@@ -55,30 +56,14 @@ const saveProgress = (progress: any) => {
     fs.writeFileSync(progressFilePath, JSON.stringify(progress, null, 2));
 };
 
-const scrapePage = async (url: string) => {
-    try {
-        const loader = new PuppeteerWebBaseLoader(url, {
-            launchOptions: { headless: true },
-            gotoOptions: { waitUntil: "domcontentloaded" },
-        });
-
-        const pageContent = await loader.scrape();
-
-        if (!pageContent) {
-            console.warn(`No content found for URL: ${url}`);
-            return '';
-        }
-
-        // Filter Content
-        let textContent = pageContent.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
-        textContent = textContent.replace(/<[^>]*>?/gm, "");
-        textContent = textContent.replace(/&quot;|&lt;|&gt;|&amp;/g, "");
-
-        return textContent.trim();
-    } catch (error) {
-        console.error(`Error scraping page ${url}:`, error);
-        return '';
+const fetchMarkdown = async (url: string) => {
+    const response = await fetch(`https://md.dhr.wtf/?url=${url}`, {
+        headers: { 'Authorization': `Bearer ${MARKDOWNER_API_KEY}` }
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to fetch markdown for ${url}: ${response.statusText}`);
     }
+    return await response.text();
 };
 
 const loadSampleData = async () => {
@@ -103,42 +88,45 @@ const loadSampleData = async () => {
             }
 
             console.log(`Processing URL: ${url}`);
-            const content = await scrapePage(url);
+            const markdown = await fetchMarkdown(url);
 
-            if (!content) {
+            if (!markdown) {
                 console.log(`Skipping empty content for URL: ${url}`);
                 continue;
             }
 
-            const chunks = await splitter.splitText(content);
+            const chunks = await splitter.createDocuments([markdown]);
             console.log(`Splitting content into ${chunks.length} chunks`);
 
-            for (const chunk of chunks) {
-                try {
-                    const embeddingResponse = await embeddings.embedQuery(chunk);
+            try {
+                const embeddingResponse = await embeddings.embedDocuments(chunks.map(chunk => chunk.pageContent));
 
-                    if (!embeddingResponse || embeddingResponse.length === 0) {
-                        throw new Error('API limit reached or failed embedding response');
-                    }
+                if (!embeddingResponse || embeddingResponse.length === 0) {
+                    throw new Error('API limit reached or failed embedding response');
+                }
 
-                    const vector = embeddingResponse;
+                // Insert each chunk with metadata, embedding and text
+                for (let i = 0; i < chunks.length; i++) {
+                    const vector = embeddingResponse[i];
+                    const text = chunks[i].pageContent;
+                    const metadata = chunks[i].metadata;
 
-                    // Insert the vector and text chunk into the DB collection
                     const res = await collection.insertOne({
                         $vector: vector,
-                        text: chunk,
+                        text,
+                        metadata
                     });
 
-                    console.log(`Inserted chunk into collection: ${res}`);
+                    console.log(`Inserted chunk with metadata into collection: ${res}`);
 
                     // Update progress after each chunk
                     progress.totalChunksProcessed++;
                     saveProgress(progress);
-
-                } catch (error) {
-                    console.error("Error embedding chunk:", error);
-                    break;
                 }
+
+            } catch (error) {
+                console.error("Error embedding chunk:", error);
+                break;
             }
 
             // Mark URL as processed once all chunks are handled
