@@ -39,24 +39,27 @@ export async function POST(req: Request) {
       sort: {
         $vector: embeddingResponse,
       },
-      limit: 5,
+      limit: 10,
     });
 
     const documents = await cursor.toArray();
-    const documentsMap = documents.map((doc) => doc.text);
-    const documentsContext = JSON.stringify(documentsMap);
+    const documentsMap = documents.map((doc) => ({
+      text: doc.text,
+      url: doc.metadata.url,
+      loc: doc.metadata.loc
+    }));
 
     const template = {
       role: "system",
-      content: `You are an AI assistant who knows everything about Zubair Imtiaz's portfolio. Use the context provided below to augment your responses based on the most recent portfolio data.
+      content: `You are an AI assistant who knows everything about Zubair Imtiaz's portfolio. Use the context provided below to augment your responses based on the most recent portfolio data and include links to the relevant sections of Zubair Imtiaz's portfolio where applicable.
       
       If the context doesn't include the information you need, answer based on existing knowledge, but avoid mentioning whether the context does or doesn't include specific details.
 
-      Format responses using markdown where applicable and don't return any context details in the answer.
+      Format responses using markdown where applicable.
 
       ------
       START CONTEXT
-      ${documentsContext}
+      ${JSON.stringify(documentsMap)}
       END CONTEXT
       ------
 

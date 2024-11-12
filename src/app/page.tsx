@@ -115,9 +115,9 @@ export default function Home() {
         {/* Initial Message */}
         {messages.length === 0 && (
           <div className="w-full bg-background shadow-sm border rounded-lg p-8 flex flex-col gap-2">
-            <h1 className="font-bold">Welcome to this example app.</h1>
+            <h1 className="font-bold">Simplest Next.js RAG Boilerplate</h1>
             <p className="text-muted-foreground text-sm">
-              This is a simple Next.JS example application created using{" "}
+              It is designed to help you quickly set up a RAG chatbot using{" "}
               <a
                 href="https://github.com/jakobhoeg/shadcn-chat"
                 className="font-bold inline-flex flex-1 justify-center gap-1 leading-4 hover:underline"
@@ -136,7 +136,7 @@ export default function Home() {
                   ></path>
                 </svg>
               </a>{" "}
-              components. It uses{" "}
+              components and{" "}
               <a
                 href="https://sdk.vercel.ai/"
                 className="font-bold inline-flex flex-1 justify-center gap-1 leading-4 hover:underline"
@@ -155,12 +155,77 @@ export default function Home() {
                   ></path>
                 </svg>
               </a>{" "}
-              for the AI integration. Build chat interfaces like this at
-              lightspeed with shadcn-chat.
             </p>
             <p className="text-muted-foreground text-sm">
-              Make sure to also checkout the shadcn-chat support component at
-              the bottom right corner.
+              Get AI-powered answers from your portfolio or any website content
+              using{" "}
+              <a
+                href="https://astra.datastax.com"
+                className="font-bold inline-flex items-center gap-1 hover:underline"
+              >
+                Astra DB
+                <svg
+                  aria-hidden="true"
+                  height="7"
+                  viewBox="0 0 6 6"
+                  width="7"
+                  className="opacity-70"
+                >
+                  <path
+                    d="M1.25215 5.54731L0.622742 4.9179L3.78169 1.75597H1.3834L1.38936 0.890915H5.27615V4.78069H4.40513L4.41109 2.38538L1.25215 5.54731Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </a>{" "}
+              for vector storage,{" "}
+              <a
+                href="https://groq.com"
+                className="font-bold inline-flex items-center gap-1 hover:underline"
+              >
+                Groq
+                <svg
+                  aria-hidden="true"
+                  height="7"
+                  viewBox="0 0 6 6"
+                  width="7"
+                  className="opacity-70"
+                >
+                  <path
+                    d="M1.25215 5.54731L0.622742 4.9179L3.78169 1.75597H1.3834L1.38936 0.890915H5.27615V4.78069H4.40513L4.41109 2.38538L1.25215 5.54731Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </a>{" "}
+              for LLM, and{" "}
+              <a
+                href="https://jina.ai"
+                className="font-bold inline-flex items-center gap-1 hover:underline"
+              >
+                Jina
+                <svg
+                  aria-hidden="true"
+                  height="7"
+                  viewBox="0 0 6 6"
+                  width="7"
+                  className="opacity-70"
+                >
+                  <path
+                    d="M1.25215 5.54731L0.622742 4.9179L3.78169 1.75597H1.3834L1.38936 0.890915H5.27615V4.78069H4.40513L4.41109 2.38538L1.25215 5.54731Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </a>{" "}
+              for embeddings.
+            </p>
+            <p className="text-muted-foreground text-sm">
+              Clone the{" "}
+              <a
+                href="https://github.com/ZubairImtiaz3/Next-RAG-Boilerplate"
+                className="font-bold inline-flex items-center gap-1 hover:underline"
+              >
+                GitHub repository
+              </a>{" "}
+              to get started with your own RAG implementation.
             </p>
           </div>
         )}

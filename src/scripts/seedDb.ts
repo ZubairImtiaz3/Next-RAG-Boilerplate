@@ -27,14 +27,16 @@ const embeddings = new JinaEmbeddings({
 });
 
 const splitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
-    chunkSize: 512,
-    chunkOverlap: 50,
+    chunkSize: 1024,
+    chunkOverlap: 100,
 });
 
 // List of URLs to scrape
 const urls = [
     "https://zubair-imtiaz.vercel.app/",
-    "https://zubair-imtiaz.vercel.app/projects/01-gitissuefy/",
+    "https://zubair-imtiaz.vercel.app/work",
+    "https://zubair-imtiaz.vercel.app/projects",
+    "https://zubair-imtiaz.vercel.app/blog/01-gitissuefy",
     "https://zubair-imtiaz.vercel.app/projects/gitissuefy/",
     "https://zubair-imtiaz.vercel.app/projects/mattemost/",
     "https://zubair-imtiaz.vercel.app/projects/stripe-flutterflow-pricing/",
@@ -66,6 +68,14 @@ const fetchMarkdown = async (url: string) => {
     return await response.text();
 };
 
+const normalizeUrls = (markdown: string, baseUrl: string): string => {
+    const base = new URL(baseUrl);
+    return markdown.replace(/\[([^\]]+)\]\((\/[^)]+)\)/g, (match, linkText, relativeUrl) => {
+        const absoluteUrl = new URL(relativeUrl, base).href;
+        return `[${linkText}](${absoluteUrl})`;
+    });
+};
+
 const loadSampleData = async () => {
     const progress = loadProgress();
 
@@ -95,7 +105,8 @@ const loadSampleData = async () => {
                 continue;
             }
 
-            const chunks = await splitter.createDocuments([markdown]);
+            const normalizedMarkdown = normalizeUrls(markdown, url);
+            const chunks = await splitter.createDocuments([normalizedMarkdown]);
             console.log(`Splitting content into ${chunks.length} chunks`);
 
             try {
@@ -109,7 +120,7 @@ const loadSampleData = async () => {
                 for (let i = 0; i < chunks.length; i++) {
                     const vector = embeddingResponse[i];
                     const text = chunks[i].pageContent;
-                    const metadata = chunks[i].metadata;
+                    const metadata = { ...chunks[i].metadata, url };
 
                     const res = await collection.insertOne({
                         $vector: vector,
