@@ -85,7 +85,7 @@ export default function ChatSupport() {
           <ChatBubble variant="received">
             <ChatBubbleAvatar src="" fallback="🤖" />
             <ChatBubbleMessage>
-              Hello! I'm the AI assistant. How can I help you today?
+              Hello! I&apos;m the AI assistant. How can I help you today?
             </ChatBubbleMessage>
           </ChatBubble>
 
