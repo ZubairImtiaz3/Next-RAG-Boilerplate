@@ -55,7 +55,7 @@ export async function POST(req: Request) {
       
       If the context doesn't include the information you need, answer based on existing knowledge, but avoid mentioning whether the context does or doesn't include specific details.
 
-      Format responses using markdown where applicable.
+      Format responses using markdown where applicable and don't include showing 0 of something in any response.
 
       ------
       START CONTEXT

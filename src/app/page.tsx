@@ -15,7 +15,6 @@ import {
   Mic,
   Paperclip,
   RefreshCcw,
-  Send,
   Volume2,
 } from "lucide-react";
 import { useChat } from "ai/react";
@@ -24,6 +23,7 @@ import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import CodeDisplayBlock from "@/components/code-display-block";
+import PreDefinedMessages from "@/components/ui/chat/pre-defined-messages";
 
 const ChatAiIcons = [
   {
@@ -50,6 +50,7 @@ export default function Home() {
     handleSubmit,
     isLoading,
     reload,
+    append,
   } = useChat({
     onResponse(response) {
       if (response) {
@@ -107,6 +108,16 @@ export default function Home() {
         navigator.clipboard.writeText(message.content);
       }
     }
+  };
+
+  const handlePredefinedMessage = (msg: string) => {
+    const message = {
+      id: crypto.randomUUID(),
+      role: "user" as "user",
+      content: msg,
+    };
+    setIsGenerating(true);
+    append(message);
   };
 
   return (
@@ -229,6 +240,8 @@ export default function Home() {
             </p>
           </div>
         )}
+
+        <PreDefinedMessages onMessageClick={handlePredefinedMessage} />
 
         {/* Messages */}
         {messages &&
